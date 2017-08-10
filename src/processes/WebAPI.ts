@@ -27,7 +27,7 @@ class WebAPI
 
         function setComponentValue(req, res)
         {
-            if(req.params.component.readOnly)
+            if(req.params.component.readOnly || req.authorization.isReadOnly)
             {
                 res.send(400, "Component is Read Only");
                 return;
@@ -48,7 +48,7 @@ class WebAPI
             res.send(req.params.component.serialized());
         }
 
-        server.get("/api", (req, res) => {
+        server.get("/api", WebAPI.webServer.authorizeUser, (req, res) => {
 
             let components = {};
 
@@ -86,12 +86,12 @@ class WebAPI
             });
         });
 
-        server.get("/api/components/:componentID", getComponent, (req, res) => {
+        server.get("/api/components/:componentID", WebAPI.webServer.authorizeUser, getComponent, (req, res) => {
             res.send(req.params.component.serialized());
         });
 
-        server.post("/api/components/:componentID", getComponent, setComponentValue);
-        server.post("/api/components/:componentID/:value", getComponent, setComponentValue);
+        server.post("/api/components/:componentID", WebAPI.webServer.authorizeUser, getComponent, setComponentValue);
+        server.post("/api/components/:componentID/:value", WebAPI.webServer.authorizeUser, getComponent, setComponentValue);
     }
 }
 

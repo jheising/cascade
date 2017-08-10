@@ -105,3 +105,6 @@ crashlytics-build.properties
 fabric.properties
 
 data/
+*.js
+*.d.ts
+*.map

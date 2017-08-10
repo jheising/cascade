@@ -8,6 +8,7 @@ export interface ComponentDefinition {
     type?: "BOOLEAN" | "NUMBER" | "STRING";
     id: string;
     modbusAddress?: number;
+    modbusLength?: number;
     readOnly?: boolean;
     persist?: boolean;
     name?: string;
@@ -20,6 +21,7 @@ export class Component extends EventEmitter implements ComponentDefinition {
     type: "BOOLEAN" | "NUMBER" | "STRING";
     id: string;
     modbusAddress: number;
+    modbusLength: number;
     readOnly: boolean;
     persist: boolean;
     name: string;
@@ -85,9 +87,34 @@ export class Component extends EventEmitter implements ComponentDefinition {
         }
     }
 
+    isValidForModbusAddress(addr:number):boolean
+    {
+        if(_.isNil(this.modbusAddress)) return false;
+        let mbLength = _.isNil(this.modbusLength) ? 1 : this.modbusLength;
+        return (addr >= this.modbusAddress && addr < this.modbusAddress + mbLength);
+    }
+
+    getModbusValueAtAddress(addr:number):number
+    {
+        if(!this.isValidForModbusAddress(addr)) return 0;
+
+        switch(this.type)
+        {
+            case "BOOLEAN":
+            {
+                return addr === this.modbusAddress && this.value === true ? 1 : 0;
+            }
+        }
+    }
+
+    setModbusValueForAddress(addr:number, value:number)
+    {
+        if(!this.isValidForModbusAddress(addr)) return;
+    }
+
     serialized()
     {
-        let result = _.pick(this, ["type", "id", "modbusAddress", "readOnly", "persist", "name", "description", "units", "value", "secondsSinceLastUpdate"]);
+        let result = _.pick(this, ["type", "id", "modbusAddress", "modbusLength", "readOnly", "persist", "name", "description", "units", "value", "secondsSinceLastUpdate"]);
 
         if(this.lastUpdated)
         {
